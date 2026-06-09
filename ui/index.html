@@ -3,105 +3,328 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aetherion | Sovereign Command Deck</title>
+    <title>Aetherion Studio v4.0</title>
     <style>
-        :root { --bg: #09090b; --surface: #18181b; --primary: #00ffcc; --danger: #ff3366; --warning: #ffcc00; --text: #e4e4e7; }
-        body { margin: 0; font-family: 'Courier New', monospace; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
-        #sidebar { width: 260px; background: rgba(24, 24, 27, 0.8); border-right: 1px solid #27272a; padding: 20px; box-shadow: inset -10px 0 20px rgba(0,0,0,0.5); backdrop-filter: blur(10px); z-index: 10; }
-        .logo-text { font-size: 22px; font-weight: bold; color: var(--primary); text-transform: uppercase; letter-spacing: 3px; text-shadow: 0 0 10px rgba(0, 255, 204, 0.5); margin-bottom: 30px; }
-        .nav-item { padding: 10px 0; border-bottom: 1px solid #27272a; font-size: 14px; display: flex; justify-content: space-between; }
-        .status-dot { height: 8px; width: 8px; background-color: var(--primary); border-radius: 50%; box-shadow: 0 0 8px var(--primary); margin-top: 5px; }
-        #main { flex: 1; display: flex; flex-direction: column; position: relative; }
-        #header { padding: 20px; border-bottom: 1px solid #27272a; display: flex; justify-content: space-between; background: var(--surface); z-index: 10; }
-        .stat-box { display: flex; gap: 20px; }
-        .stat { background: #000; padding: 5px 15px; border-radius: 4px; border: 1px solid #333; color: var(--primary); }
-        .stat.alert { color: var(--danger); border-color: var(--danger); font-weight: bold; animation: pulse 1s infinite; }
-        #workspace { flex: 1; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 20px; overflow-y: auto; }
-        .panel { background: var(--surface); border: 1px solid #27272a; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
-        .panel::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--primary), transparent); opacity: 0.5; }
-        h2 { margin-top: 0; font-size: 12px; color: #a1a1aa; letter-spacing: 2px; text-transform: uppercase; }
-        pre { flex: 1; overflow-y: auto; color: #10b981; font-size: 13px; margin: 0; line-height: 1.4; }
-        .error { color: var(--danger); font-weight: bold; }
-        .success { color: var(--primary); }
-        
-        /* Simulated Real-Time Canvas Graph Chart */
-        .chart-container { display: flex; align-items: flex-end; gap: 4px; height: 120px; border-left: 2px solid #333; border-bottom: 2px solid #333; padding-top: 10px; margin-top: 10px; }
-        .chart-bar { flex: 1; background: linear-gradient(180deg, var(--primary), transparent); height: 10%; transition: height 0.3s ease; }
-        .chart-bar.malicious { background: linear-gradient(180deg, var(--danger), transparent); }
+        :root {
+            --bg-base: #050a14;
+            --bg-panel: #0d1527;
+            --border: #1e2d4a;
+            --text-main: #e2e8f0;
+            --text-muted: #64748b;
+            --accent-cyan: #00f0ff;
+            --accent-red: #ff3366;
+            --accent-green: #00ff9d;
+            --font-mono: 'Fira Code', 'Consolas', monospace;
+            --font-sans: 'Inter', -apple-system, sans-serif;
+        }
 
-        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-panel);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+        .logo {
+            padding: 20px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--accent-cyan);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-group { padding: 15px 0; }
+        .nav-header {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            padding: 0 20px 10px;
+            letter-spacing: 1px;
+        }
+        .nav-item {
+            padding: 10px 20px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+        .nav-item:hover { background-color: rgba(0, 240, 255, 0.1); color: var(--accent-cyan); }
+        .nav-item.active { border-left: 3px solid var(--accent-cyan); background: rgba(0, 240, 255, 0.05); }
+
+        /* MAIN WORKSPACE */
+        .workspace { flex: 1; display: flex; flex-direction: column; }
+        
+        .topbar {
+            height: 50px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            background: var(--bg-panel);
+        }
+        .btn-compile {
+            background: transparent;
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 6px 15px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-compile:hover { background: var(--accent-cyan); color: var(--bg-base); }
+
+        .editor-container {
+            flex: 1;
+            padding: 20px;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-y: auto;
+            position: relative;
+        }
+        .line-number { color: var(--text-muted); margin-right: 15px; user-select: none; }
+        .keyword { color: #c678dd; }
+        .type { color: #e5c07b; }
+        .string { color: #98c379; }
+        .comment { color: var(--text-muted); font-style: italic; }
+        
+        .squiggle {
+            text-decoration: underline wavy var(--accent-red);
+            position: relative;
+            cursor: pointer;
+        }
+        .tooltip {
+            visibility: hidden;
+            position: absolute;
+            bottom: 100%; left: 0;
+            background: #111;
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            width: 250px;
+            z-index: 10;
+            white-space: pre-wrap;
+        }
+        .squiggle:hover .tooltip { visibility: visible; }
+
+        /* TERMINAL PANEL */
+        .terminal {
+            height: 30%;
+            background: #000;
+            border-top: 1px solid var(--border);
+            padding: 15px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-main);
+            overflow-y: auto;
+        }
+        .log-time { color: var(--text-muted); }
+        .log-success { color: var(--accent-green); }
+        .log-info { color: var(--accent-cyan); }
+        .log-warn { color: #e5c07b; }
+
+        /* INSPECTOR PANEL */
+        .inspector {
+            width: 300px;
+            background: var(--bg-panel);
+            border-left: 1px solid var(--border);
+            padding: 20px;
+        }
+        .card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .card-title { font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+        .stat-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+        .stat-val { font-family: var(--font-mono); color: var(--accent-cyan); }
     </style>
 </head>
 <body>
-    <div id="sidebar">
-        <div class="logo-text">AETHERION</div>
-        <div class="nav-item"><span>Crypto Engine</span> <span class="status-dot"></span></div>
-        <div class="nav-item"><span>TCP Gateway</span> <span class="status-dot"></span></div>
-        <div class="nav-item"><span>BEAM-X Mesh</span> <span class="status-dot"></span></div>
-    </div>
-    <div id="main">
-        <div id="header">
-            <div>NODE LOCATION: <strong>JOHANNESBURG-01</strong></div>
-            <div class="stat-box">
-                <div class="stat text-danger" id="stat-attacks" class="stat">ATTACKS BLOCKED: 0</div>
-                <div class="stat">HEALTH: 99.99%</div>
-            </div>
+
+    <div class="sidebar">
+        <div class="logo">🌌 AETHERION</div>
+        
+        <div class="nav-group">
+            <div class="nav-header">Missions</div>
+            <div class="nav-item active">📄 telemetry.ae</div>
+            <div class="nav-item">📄 medical_qpu.ae</div>
+            <div class="nav-item">📄 deep_space.ae</div>
         </div>
-        <div id="workspace">
-            <div class="panel">
-                <h2>Real-Time Cluster Traffic Ingestion</h2>
-                <div class="chart-container" id="live-chart">
-                    </div>
+
+        <div class="nav-group">
+            <div class="nav-header">Sovereign Mesh</div>
+            <div class="nav-item">🌍 PTA-02 (Local)</div>
+            <div class="nav-item">🛰️ ORBIT-ALPHA</div>
+            <div class="nav-item">🌑 LUNAR-TYCHO</div>
+        </div>
+    </div>
+
+    <div class="workspace">
+        <div class="topbar">
+            <div style="font-size: 13px; color: var(--text-muted);">/workspaces/aetherion/telemetry.ae</div>
+            <button class="btn-compile" onclick="runSimulation()">▶ cargo run -- run</button>
+        </div>
+
+        <div class="editor-container">
+            <div><span class="line-number">1</span><span class="keyword">actor</span> DroneSwarm {</div>
+            <div><span class="line-number">2</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">requires</span> CheckLease { capability: <span class="string">"InvokePhysicsEngine"</span> }</div>
+            <div><span class="line-number">3</span></div>
+            <div><span class="line-number">4</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">state</span> {</div>
+            <div><span class="line-number">5</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> speed: <span class="type">Velocity&lt;c&gt;</span> = <span class="string">0.95</span></div>
+            <div><span class="line-number">6</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> angle_attack: <span class="type">deg</span> = <span class="string">25.0</span></div>
+            <div><span class="line-number">7</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> dose_mg: <span class="type">f64</span> = <span class="string">500.0</span></div>
+            <div><span class="line-number">8</span>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+            <div><span class="line-number">9</span></div>
+            <div><span class="line-number">10</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">invariant</span> aerodynamic_safety {</div>
+            <div><span class="line-number">11</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="squiggle">AXB_NAVIER_STOKES_STEP(angle_attack)</span>
+                <span class="tooltip">🛑 [COMPILER ERROR] Turbulence detected! Re > 2300. 
+↳ Adjust wing attack angle to maintain laminar flow.</span>
             </div>
-            <div class="panel">
-                <h2>Crypto Firewall Security Logs</h2>
-                <pre id="log-security">> Awaiting peer handshakes...
-[SECURITY] Encryption Policy: AES-256-GCM + HMAC-SHA256 active.</pre>
-            </div>
-            <div class="panel">
-                <h2>BEAM-X Mesh Buffer</h2>
-                <pre>System Metrics processing: NOMINAL
-[ACTOR] DroneController listening on channel 'wg0'...</pre>
-            </div>
-            <div class="panel">
-                <h2>Active Network Map</h2>
-                <pre style="color: #60a5fa">> wg0 interface: 10.0.0.1
-> Connected Node: PRETORIA-02 (Secure Tunnel)
-> Untrusted Socket Boundary: Inbound WAN on port 4000 opened.</pre>
-            </div>
+            <div><span class="line-number">12</span>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+            <div><span class="line-number">13</span>}</div>
+        </div>
+
+        <div class="terminal" id="terminal">
+            <div><span class="log-time">[Aetherion OS]</span> Awaiting compilation sequence...</div>
+        </div>
+    </div>
+
+    <div class="inspector">
+        <div class="card">
+            <div class="card-title">Physics LSP Inspector</div>
+            <div class="stat-row"><span>Reynolds (Re)</span> <span class="stat-val" style="color:var(--accent-red);">4500.0 ⚠</span></div>
+            <div class="stat-row"><span>Lorentz (γ)</span> <span class="stat-val">3.20</span></div>
+            <div class="stat-row"><span>Divergence (∇·B)</span> <span class="stat-val">0.00</span></div>
+            <div class="stat-row"><span>Qubit Fidelity</span> <span class="stat-val">0.99</span></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Mesh Status</div>
+            <div class="stat-row"><span>HLC Drift</span> <span class="stat-val log-success">Safe</span></div>
+            <div class="stat-row"><span>ZK Proof</span> <span class="stat-val log-success">Verified</span></div>
+            <div class="stat-row"><span>DO-178C</span> <span class="stat-val log-success">Passing</span></div>
+        </div>
+    </div>
+
+    <script>
+        const logs = [
+            "=======================================================",
+            "        AETHERION V4: PHYSICS LINTER & COMPILER        ",
+            "=======================================================",
+            "<span class='log-warn'>🌊 [LSP CFD SCAN] Analyzing Fluid Profile (Re: 1200)</span>",
+            "<span class='log-success'>  ✔ [LSP PASS] Laminar flow confirmed. Physics safe.</span>",
+            "<span class='log-warn'>⚕️  [LSP OTT SCAN] Analyzing Drug Payload (Dose: 250mg, Patient: 60kg)</span>",
+            "<span class='log-success'>  ✔ [LSP PASS] Dosage within therapeutic window.</span>",
+            "\n[LSP PASS] All domains cleared. Firing Universal VM...\n",
+            "=======================================================",
+            "        PHASE 30: AETHERION V4 UNIVERSAL PHYSICS CORE  ",
+            "=======================================================",
+            "<span class='log-time'>[1773099042121:0]</span> <span class='log-info'>AXB_CHECK_LEASE</span> - Locked: InvokePhysicsEngine",
+            "<span class='log-time'>[1773099042122:0]</span> <span class='log-info'>AXB_NAVIER_STOKES</span> - Executed GPU CFD Step. Re = 1200",
+            "<span class='log-time'>[1773099042123:0]</span> <span class='log-info'>AXB_MAXWELL</span> - Gauss Law enforced: ∇·B = 0",
+            "<span class='log-time'>[1773099042124:0]</span> <span class='log-info'>AXB_LORENTZ</span> - Dilating clock by γ = 3.20 at 0.95c",
+            "<span class='log-time'>[1773099042125:0]</span> <span class='log-info'>AXB_PHARMACOKINETIC</span> - Validated 500mg dose for 70kg mass",
+            "<span class='log-time'>[1773099042126:0]</span> <span class='log-info'>AXB_NEWTONIAN_GUARD</span> - AI Output validated: F=ma (100= 10*10)",
+            "<span class='log-time'>[1773099042127:0]</span> <span class='log-info'>AXB_DISK_SNAPSHOT</span> - Universal state frozen: 1773099042200:V4_PHYSICS_CONVERGED",
+            "\n<span class='log-success'>  ✔ [LEDGER SEALED] The Universal Physics Substrate is bound to disk.</span>"
+        ];
+
+        async function runSimulation() {
+            const terminal = document.getElementById('terminal');
+            terminal.innerHTML = '';
+            
+            for (let i = 0; i < logs.length; i++) {
+                await new Promise(r => setTimeout(r, 150));
+                terminal.innerHTML += `<div>${logs[i]}</div>`;
+                terminal.scrollTop = terminal.scrollHeight;
+            }
+        }
+    </script>
+</body>
+</html>
+<body>
+    <div class="sidebar">
+        <div class="logo">🌌 AETHERION</div>
+        <div class="nav-group"><div class="nav-header">Missions</div><div class="nav-item active">📄 telemetry.ae</div></div>
+        <div class="nav-group"><div class="nav-header">Sovereign Mesh</div><div class="nav-item">🌍 PTA-02 (Local)</div></div>
+    </div>
+    <div class="workspace">
+        <div class="topbar">
+            <div style="font-size: 13px; color: var(--text-muted);">/workspaces/aetherion/telemetry.ae</div>
+            <button class="btn-compile" onclick="runSimulation()">▶ cargo run -- run</button>
+        </div>
+        <div class="editor-container">
+            <div><span class="line-number">1</span><span class="keyword">actor</span> PhysicsGuard {</div>
+            <div><span class="line-number">2</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">state</span> { <span class="keyword">let</span> speed: <span class="type">Velocity</span> = <span class="string">0.95c</span> }</div>
+            <div><span class="line-number">3</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">invariant</span> cfd_check {</div>
+            <div><span class="line-number">4</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="squiggle">AXB_NAVIER_STOKES_STEP(1500.0)</span><span class="tooltip">🛑 [COMPILER ERROR] Turbulence trajectory risk detected! Re > 2300. ↳ Adjust framework parameters to preserve absolute boundary safety.</span></div>
+            <div><span class="line-number">5</span>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+            <div><span class="line-number">6</span>}</div>
+        </div>
+        <div class="terminal" id="terminal"><div>[Aetherion Studio OS] Workspace active. Awaiting compilation initialization...</div></div>
+    </div>
+    <div class="inspector">
+        <div class="card">
+            <div class="card-title">Universal Core Metrics</div>
+            <div class="stat-row"><span>Reynolds (Re)</span> <span class="stat-val" style="color:var(--accent-red);">4500.0 ⚠</span></div>
+            <div class="stat-row"><span>Lorentz (γ)</span> <span class="stat-val">3.20</span></div>
+            <div class="stat-row"><span>Divergence</span> <span class="stat-val">0.00</span></div>
         </div>
     </div>
     <script>
-        // Populate and animate live graph bars
-        const chart = document.getElementById('live-chart');
-        let attackCount = 0;
-        
-        for (let i = 0; i < 28; i++) {
-            const bar = document.createElement('div');
-            bar.className = 'chart-bar';
-            bar.style.height = `${Math.floor(Math.random() * 40) + 10}%`;
-            chart.appendChild(bar);
+        const logs = [
+            "=======================================================",
+            "        AETHERION V4: PHYSICS LINTER & COMPILER        ",
+            "=======================================================",
+            "<span class='log-warn'>🌊 [LSP CFD SCAN] Analyzing Fluid Profile (Re: 1500)</span>",
+            "<span class='log-success'>  ✔ [LSP PASS] Laminar flow confirmed. Physics safe.</span>",
+            "<span class='log-warn'>⚕️  [LSP OTT SCAN] Analyzing Drug Payload (Dose: 250mg, Patient: 60kg)</span>",
+            "<span class='log-success'>  ✔ [LSP PASS] Dosage within therapeutic window.</span>",
+            "\n[LSP PASS] All domains cleared. Firing Universal VM...\n",
+            "=======================================================",
+            "        PHASE 30: AETHERION V4 UNIVERSAL PHYSICS CORE  ",
+            "=======================================================",
+            "<span>[1773099042121:0]</span> <span class='log-info'>AXB_CHECK_LEASE</span> - Locked: InvokePhysicsEngine",
+            "<span>[1773099042122:0]</span> <span class='log-info'>AXB_NAVIER_STOKES</span> - Executed GPU CFD Step. Re = 1200",
+            "<span>[1773099042123:0]</span> <span class='log-info'>AXB_MAXWELL</span> - Gauss Law enforced: Div B = 0",
+            "<span>[1773099042124:0]</span> <span class='log-info'>AXB_LORENTZ</span> - Dilating clock by Gamma = 3.20 at 0.95c",
+            "<span>[1773099042125:0]</span> <span class='log-info'>AXB_PHARMACOKINETIC</span> - Validated 500mg dose for 70kg mass",
+            "<span>[1773099042126:0]</span> <span class='log-info'>AXB_NEWTONIAN_GUARD</span> - AI Output validated: F=ma (100= 10*10)",
+            "<span>[1773099042127:0]</span> <span class='log-info'>AXB_DISK_SNAPSHOT</span> - Universal state frozen: V4_PHYSICS_CONVERGED",
+            "\n<span class='log-success'>  ✔ [LEDGER SEALED] The Universal Physics Substrate is bound to disk.</span>"
+        ];
+        async function runSimulation() {
+            const term = document.getElementById('terminal'); term.innerHTML = '';
+            for (let i = 0; i < logs.length; i++) {
+                await new Promise(r => setTimeout(r, 120));
+                term.innerHTML += `<div>${logs[i]}</div>`;
+                term.scrollTop = term.scrollHeight;
+            }
         }
-
-        // Simulate a legitimate signed packet arriving over the socket
-        setTimeout(() => {
-            document.getElementById('log-security').innerHTML += "\n<br><span class='success'>[TCP CONNECT] Node 10.0.0.4 transmitted signed payload.</span>\n↳ Signature check: <span class='success'>VALID MATCH</span>. Parsing frame.";
-            const targetBar = chart.children[20];
-            targetBar.style.height = '95%';
-        }, 2000);
-
-        // Simulate a hacker trying to send spoofed telemetry without a signature
-        setTimeout(() => {
-            attackCount++;
-            document.getElementById('stat-attacks').innerHTML = `ATTACKS BLOCKED: ${attackCount}`;
-            document.getElementById('stat-attacks').className = "stat alert";
-            document.getElementById('log-security').innerHTML += "\n<br><span class='error'>[SECURITY CRITICAL] Node 198.51.100.42 transmitted telemetry payload!</span>\n<span class='error'>↳ ✖ REJECTED: Missing cryptographic authentication token signature! Connection severed.</span>";
-            
-            // Render the intrusion spike on the chart in blood red
-            const maliciousBar = chart.children[24];
-            maliciousBar.className = 'chart-bar malicious';
-            maliciousBar.style.height = '100%';
-        }, 4500);
     </script>
 </body>
 </html>
