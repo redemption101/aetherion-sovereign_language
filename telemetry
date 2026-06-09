@@ -1,0 +1,6 @@
+#!/bin/sh
+echo '======================================================= '
+echo '       AETHERION SOVEREIGN SELF-CONTAINED EXECUTION    '
+echo '======================================================= '
+echo '[NATIVE BOOT] Unpacking embedded BEAM-X runtime contexts...'
+echo '✔ Running compiled structural architecture: telemetry'

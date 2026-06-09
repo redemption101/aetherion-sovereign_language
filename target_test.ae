@@ -1,0 +1,5 @@
+actor TestFlightNode {
+    state {
+        let speed: kg = 45
+    }
+}

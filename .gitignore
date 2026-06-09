@@ -1,0 +1,16 @@
+# Cargo build artifacts directory files
+/target
+**/*.rs.bk
+
+# Local Aetherion snapshot databases and logs
+cluster_state.db
+compliance_audit_manifest.json
+manifest.toml
+/deploy/helm/charts
+
+# Local IDE configuration caches
+.vscode/
+.idea/
+*.log
+minikube-linux-amd64
+minikube-linux-amd64

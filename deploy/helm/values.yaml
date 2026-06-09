@@ -1,0 +1,39 @@
+# aetherion-grid Deployment Infrastructure Matrix Configuration
+
+replicaCount: 3
+
+image:
+  repository: aetherion/control-plane-core
+  pullPolicy: IfNotPresent
+  tag: "v1.10.0"
+
+# Target Topology Infrastructure Routing Map Parameters
+topologyConfig:
+  meshNetwork: "interplanetary"
+  hlcSyncIntervalMs: 50
+  sacrificeRateThreshold: 0.02  # Maximum permitted worker failure allocation loss ceiling
+
+# Ingest Telemetry Matrix Endpoints
+telemetry:
+  lspIngestPort: 4221
+  tcpBroadcastPort: 4222
+  metricsChannel: "SystemMetrics"
+
+# Integrated Prometheus / Grafana Monitoring Service Scrapers
+monitoring:
+  enabled: true
+  scrapers:
+    - name: "hlc_drift_seconds"
+      path: "/metrics/clocks"
+    - name: "lease_expiries_total"
+      path: "/metrics/security"
+    - name: "hive_worker_pool_saturation"
+      path: "/metrics/threads"
+
+resources:
+  limits:
+    cpu: 4000m
+    memory: 8Gi
+  requests:
+    cpu: 2000m
+    memory: 4Gi

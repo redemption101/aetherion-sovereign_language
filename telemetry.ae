@@ -1,0 +1,34 @@
+capability ReadTelemetry
+
+stream SystemMetrics {
+    partition drone_id
+    retention 14d
+}
+
+invariant DroneController never_target_speed_greater_than_100
+
+supervisor SessionSupervisor {
+    restart DroneController
+    strategy ExponentialBackoff
+}
+
+actor DroneController @edge {
+    requires ReadTelemetry {
+        expiry: 300
+        quota: 1000
+    }
+    receive UpdateTelemetry
+    state {
+        let synapse_core_omega: Synapse = 0.984
+        let control_plane_zk_token: ZKProof = 1.0
+        let planetary_device_pool: NodeQuorum = 4200000000.0
+        let mars_relay_lag: Int64 = 720
+        
+        let safety_margin: Celsius = 12.5
+        let target_speed: m/s = 45.0
+    }
+    assert safety_margin > 0.0
+    if target_speed > 40.0 and safety_margin < 20.0 {
+        emit SystemMetrics
+    }
+}

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aetherion | Sovereign Command Deck</title>
+    <style>
+        :root { --bg: #09090b; --surface: #18181b; --primary: #00ffcc; --danger: #ff3366; --warning: #ffcc00; --text: #e4e4e7; }
+        body { margin: 0; font-family: 'Courier New', monospace; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+        #sidebar { width: 260px; background: rgba(24, 24, 27, 0.8); border-right: 1px solid #27272a; padding: 20px; box-shadow: inset -10px 0 20px rgba(0,0,0,0.5); backdrop-filter: blur(10px); z-index: 10; }
+        .logo-text { font-size: 22px; font-weight: bold; color: var(--primary); text-transform: uppercase; letter-spacing: 3px; text-shadow: 0 0 10px rgba(0, 255, 204, 0.5); margin-bottom: 30px; }
+        .nav-item { padding: 10px 0; border-bottom: 1px solid #27272a; font-size: 14px; display: flex; justify-content: space-between; }
+        .status-dot { height: 8px; width: 8px; background-color: var(--primary); border-radius: 50%; box-shadow: 0 0 8px var(--primary); margin-top: 5px; }
+        #main { flex: 1; display: flex; flex-direction: column; position: relative; }
+        #header { padding: 20px; border-bottom: 1px solid #27272a; display: flex; justify-content: space-between; background: var(--surface); z-index: 10; }
+        .stat-box { display: flex; gap: 20px; }
+        .stat { background: #000; padding: 5px 15px; border-radius: 4px; border: 1px solid #333; color: var(--primary); }
+        .stat.alert { color: var(--danger); border-color: var(--danger); font-weight: bold; animation: pulse 1s infinite; }
+        #workspace { flex: 1; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 20px; overflow-y: auto; }
+        .panel { background: var(--surface); border: 1px solid #27272a; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .panel::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--primary), transparent); opacity: 0.5; }
+        h2 { margin-top: 0; font-size: 12px; color: #a1a1aa; letter-spacing: 2px; text-transform: uppercase; }
+        pre { flex: 1; overflow-y: auto; color: #10b981; font-size: 13px; margin: 0; line-height: 1.4; }
+        .error { color: var(--danger); font-weight: bold; }
+        .success { color: var(--primary); }
+        
+        /* Simulated Real-Time Canvas Graph Chart */
+        .chart-container { display: flex; align-items: flex-end; gap: 4px; height: 120px; border-left: 2px solid #333; border-bottom: 2px solid #333; padding-top: 10px; margin-top: 10px; }
+        .chart-bar { flex: 1; background: linear-gradient(180deg, var(--primary), transparent); height: 10%; transition: height 0.3s ease; }
+        .chart-bar.malicious { background: linear-gradient(180deg, var(--danger), transparent); }
+
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <div class="logo-text">AETHERION</div>
+        <div class="nav-item"><span>Crypto Engine</span> <span class="status-dot"></span></div>
+        <div class="nav-item"><span>TCP Gateway</span> <span class="status-dot"></span></div>
+        <div class="nav-item"><span>BEAM-X Mesh</span> <span class="status-dot"></span></div>
+    </div>
+    <div id="main">
+        <div id="header">
+            <div>NODE LOCATION: <strong>JOHANNESBURG-01</strong></div>
+            <div class="stat-box">
+                <div class="stat text-danger" id="stat-attacks" class="stat">ATTACKS BLOCKED: 0</div>
+                <div class="stat">HEALTH: 99.99%</div>
+            </div>
+        </div>
+        <div id="workspace">
+            <div class="panel">
+                <h2>Real-Time Cluster Traffic Ingestion</h2>
+                <div class="chart-container" id="live-chart">
+                    </div>
+            </div>
+            <div class="panel">
+                <h2>Crypto Firewall Security Logs</h2>
+                <pre id="log-security">> Awaiting peer handshakes...
+[SECURITY] Encryption Policy: AES-256-GCM + HMAC-SHA256 active.</pre>
+            </div>
+            <div class="panel">
+                <h2>BEAM-X Mesh Buffer</h2>
+                <pre>System Metrics processing: NOMINAL
+[ACTOR] DroneController listening on channel 'wg0'...</pre>
+            </div>
+            <div class="panel">
+                <h2>Active Network Map</h2>
+                <pre style="color: #60a5fa">> wg0 interface: 10.0.0.1
+> Connected Node: PRETORIA-02 (Secure Tunnel)
+> Untrusted Socket Boundary: Inbound WAN on port 4000 opened.</pre>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Populate and animate live graph bars
+        const chart = document.getElementById('live-chart');
+        let attackCount = 0;
+        
+        for (let i = 0; i < 28; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'chart-bar';
+            bar.style.height = `${Math.floor(Math.random() * 40) + 10}%`;
+            chart.appendChild(bar);
+        }
+
+        // Simulate a legitimate signed packet arriving over the socket
+        setTimeout(() => {
+            document.getElementById('log-security').innerHTML += "\n<br><span class='success'>[TCP CONNECT] Node 10.0.0.4 transmitted signed payload.</span>\n↳ Signature check: <span class='success'>VALID MATCH</span>. Parsing frame.";
+            const targetBar = chart.children[20];
+            targetBar.style.height = '95%';
+        }, 2000);
+
+        // Simulate a hacker trying to send spoofed telemetry without a signature
+        setTimeout(() => {
+            attackCount++;
+            document.getElementById('stat-attacks').innerHTML = `ATTACKS BLOCKED: ${attackCount}`;
+            document.getElementById('stat-attacks').className = "stat alert";
+            document.getElementById('log-security').innerHTML += "\n<br><span class='error'>[SECURITY CRITICAL] Node 198.51.100.42 transmitted telemetry payload!</span>\n<span class='error'>↳ ✖ REJECTED: Missing cryptographic authentication token signature! Connection severed.</span>";
+            
+            // Render the intrusion spike on the chart in blood red
+            const maliciousBar = chart.children[24];
+            maliciousBar.className = 'chart-bar malicious';
+            maliciousBar.style.height = '100%';
+        }, 4500);
+    </script>
+</body>
+</html>
